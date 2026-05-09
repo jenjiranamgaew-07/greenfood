@@ -1,71 +1,33 @@
-export function useGetBatch() {
-  return {
-    data: null,
-    isLoading: false,
-  };
-}
+export const useGetBatch = () => ({
+  data: {
+    batch: {
+      id: 1,
+      batchNumber: "GF-001",
+      product: "Greenfood",
+      status: "Running",
+    },
+  },
+  isLoading: false,
+});
 
-export function useListProducts() {
-  return {
-    data: [],
-    isLoading: false,
-  };
-}
+export const getGetBatchQueryKey = () => ["batch"];
 
-export function useListUsers() {
-  return {
-    data: [],
-    isLoading: false,
-  };
-}
+export const useCreateCheck = () => ({
+  mutate: () => {},
+});
 
-export function useCreateBatch() {
-  return {
-    mutateAsync: async () => ({ id: 1 }),
-    isPending: false,
-  };
-}
+export const useCreateYieldReport = () => ({
+  mutate: () => {},
+});
 
-export function useCreateDeviation() {
-  return {
-    mutateAsync: async () => ({}),
-    isPending: false,
-  };
-}
+export const useUpdateBatch = () => ({
+  mutate: () => {},
+});
 
-export function useCreateCheck() {
-  return {
-    mutateAsync: async () => ({}),
-    isPending: false,
-  };
-}
+export const getListBatchesQueryKey = () => ["batches"];
 
-export function useCreateYieldReport() {
-  return {
-    mutateAsync: async () => ({}),
-    isPending: false,
-  };
-}
+export const getListDeviationsQueryKey = () => ["deviations"];
 
-export function useUpdateBatch() {
-  return {
-    mutateAsync: async () => ({}),
-    isPending: false,
-  };
-}
-
-export function getGetBatchQueryKey() {
-  return ["batch"];
-}
-
-export function getListDeviationsQueryKey() {
-  return ["deviations"];
-}
-
-export function getListBatchesQueryKey() {
-  return ["batches"];
-}
-
-export function getListChecksQueryKey() {
-  return ["checks"];
-}
+export const useCreateDeviation = () => ({
+  mutate: () => {},
+});
