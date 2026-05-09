@@ -3,10 +3,8 @@ import { useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { useActiveBatch } from "@/lib/active-batch-context";
-import { useGetBatch, useCreateCheck, getGetBatchQueryKey, getListChecksQueryKey } from "@workspace/api-client-react";
 import { toast } from "sonner";
 import { AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 
 const CHECKLIST_ITEMS = [
   { id: "area_clean", label: "Work area is clean and free of previous product" },
@@ -23,16 +21,9 @@ const CHECKLIST_ITEMS = [
 export default function StartupChecklist() {
   const [, setLocation] = useLocation();
   const { activeBatchId } = useActiveBatch();
-  const queryClient = useQueryClient();
 
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [hasFailures, setHasFailures] = useState(false);
-
-  const { data: batchDetail } = useGetBatch(activeBatchId!, {
-    query: { enabled: !!activeBatchId }
-  });
-
-  const createCheck = useCreateCheck();
 
   useEffect(() => {
     setHasFailures(Object.values(answers).some(a => a === false));
@@ -42,31 +33,17 @@ export default function StartupChecklist() {
     setAnswers(prev => ({ ...prev, [id]: value }));
   };
 
-  const isComplete = CHECKLIST_ITEMS.every(item => answers[item.id] !== undefined);
+  const isComplete = CHECKLIST_ITEMS.every(
+    item => answers[item.id] !== undefined
+  );
 
   const handleSubmit = async () => {
-    if (!activeBatchId || !batchDetail) return;
-    try {
-      await createCheck.mutateAsync({
-        data: {
-          batchId: activeBatchId,
-          checkType: "startup",
-          checkData: answers,
-          result: hasFailures ? "fail" : "pass",
-          userName: batchDetail.batch.operatorName || "Operator",
-        }
-      });
-      queryClient.invalidateQueries({ queryKey: getGetBatchQueryKey(activeBatchId) });
-      queryClient.invalidateQueries({ queryKey: getListChecksQueryKey() });
-      if (hasFailures) {
-        toast.error("Startup checks failed — report a problem before continuing");
-        setLocation("/report-problem");
-      } else {
-        toast.success("Startup checklist passed ✓");
-        setLocation("/");
-      }
-    } catch {
-      toast.error("Failed to submit checklist");
+    if (hasFailures) {
+      toast.error("Startup checks failed");
+      setLocation("/report-problem");
+    } else {
+      toast.success("Startup checklist passed ✓");
+      setLocation("/");
     }
   };
 
@@ -75,9 +52,18 @@ export default function StartupChecklist() {
       <Layout title="Startup Checklist">
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <ShieldAlert className="w-16 h-16 text-slate-400 mb-4" />
-          <h2 className="text-xl font-bold text-slate-700">No Active Batch</h2>
-          <p className="text-slate-500 mt-2">Start a batch from the home screen first.</p>
-          <Button className="mt-6" onClick={() => setLocation("/")}>Go Home</Button>
+          <h2 className="text-xl font-bold text-slate-700">
+            No Active Batch
+          </h2>
+          <p className="text-slate-500 mt-2">
+            Start a batch from the home screen first.
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => setLocation("/")}
+          >
+            Go Home
+          </Button>
         </div>
       </Layout>
     );
@@ -93,41 +79,77 @@ export default function StartupChecklist() {
           <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-red-900 text-sm">Checklist failed — resolve before starting production</p>
+              <p className="font-bold text-red-900 text-sm">
+                Checklist failed — resolve before starting production
+              </p>
             </div>
           </div>
         )}
 
-        {/* Batch info bar */}
         <div className="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow-md">
           <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Batch</p>
-            <p className="font-mono text-lg font-bold">{batchDetail?.batch?.batchNumber ?? "—"}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+              Batch
+            </p>
+            <p className="font-mono text-lg font-bold">
+              {activeBatchId}
+            </p>
           </div>
+
           <div className="text-right">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Progress</p>
-            <p className="font-bold text-lg">{answered} / {CHECKLIST_ITEMS.length}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+              Progress
+            </p>
+            <p className="font-bold text-lg">
+              {answered} / {CHECKLIST_ITEMS.length}
+            </p>
           </div>
         </div>
 
         {CHECKLIST_ITEMS.map((item) => {
           const isYes = answers[item.id] === true;
-          const isNo  = answers[item.id] === false;
+          const isNo = answers[item.id] === false;
+
           return (
-            <div key={item.id} className={`rounded-xl border-2 shadow-sm transition-all overflow-hidden ${
-              isYes ? "border-green-400 bg-green-50" : isNo ? "border-red-400 bg-red-50" : "border-slate-200 bg-white"
-            }`}>
-              {/* Answered indicator strip */}
+            <div
+              key={item.id}
+              className={`rounded-xl border-2 shadow-sm transition-all overflow-hidden ${
+                isYes
+                  ? "border-green-400 bg-green-50"
+                  : isNo
+                  ? "border-red-400 bg-red-50"
+                  : "border-slate-200 bg-white"
+              }`}
+            >
               {(isYes || isNo) && (
-                <div className={`px-4 py-2 flex items-center gap-2 ${isYes ? "bg-green-600" : "bg-red-600"}`}>
-                  {isYes
-                    ? <><CheckCircle2 className="w-4 h-4 text-white" /><span className="text-white text-xs font-bold uppercase tracking-wider">Confirmed</span></>
-                    : <><AlertTriangle className="w-4 h-4 text-white" /><span className="text-white text-xs font-bold uppercase tracking-wider">Failed — action required</span></>
-                  }
+                <div
+                  className={`px-4 py-2 flex items-center gap-2 ${
+                    isYes ? "bg-green-600" : "bg-red-600"
+                  }`}
+                >
+                  {isYes ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                      <span className="text-white text-xs font-bold uppercase tracking-wider">
+                        Confirmed
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-4 h-4 text-white" />
+                      <span className="text-white text-xs font-bold uppercase tracking-wider">
+                        Failed — action required
+                      </span>
+                    </>
+                  )}
                 </div>
               )}
+
               <div className="p-4">
-                <p className="font-bold text-slate-800 text-base mb-4 leading-snug">{item.label}</p>
+                <p className="font-bold text-slate-800 text-base mb-4 leading-snug">
+                  {item.label}
+                </p>
+
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -140,6 +162,7 @@ export default function StartupChecklist() {
                   >
                     YES
                   </button>
+
                   <button
                     type="button"
                     onClick={() => handleAnswer(item.id, false)}
@@ -158,10 +181,10 @@ export default function StartupChecklist() {
         })}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center pb-safe max-w-md mx-auto shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center max-w-md mx-auto">
         <button
           onClick={handleSubmit}
-          disabled={!isComplete || createCheck.isPending}
+          disabled={!isComplete}
           className={`w-full h-16 text-lg font-bold rounded-xl transition-all ${
             !isComplete
               ? "bg-slate-200 text-slate-400 cursor-not-allowed"
@@ -170,9 +193,7 @@ export default function StartupChecklist() {
               : "bg-slate-900 hover:bg-slate-800 text-white"
           }`}
         >
-          {createCheck.isPending
-            ? "Submitting..."
-            : !isComplete
+          {!isComplete
             ? `${CHECKLIST_ITEMS.length - answered} items remaining`
             : hasFailures
             ? "SUBMIT WITH FAILURES"
