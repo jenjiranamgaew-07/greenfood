@@ -12,6 +12,13 @@ export function useCreateDeviation() {
   };
 }
 
+export function useCreateCheck() {
+  return {
+    mutateAsync: async () => ({}),
+    isPending: false,
+  };
+}
+
 export function getGetBatchQueryKey() {
   return ["batch"];
 }
