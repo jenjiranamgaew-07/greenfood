@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { useActiveBatch } from "@/lib/active-batch-context";
-import { useGetBatch, getGetBatchQueryKey } from "@workspace/api-client-react";
+import { useGetBatch, getGetBatchQueryKey } from "@/lib/mock-api";
 import { motion } from "framer-motion";
 import { 
   Play, ClipboardCheck, Clock, Scale, 

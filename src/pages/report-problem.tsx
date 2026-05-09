@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActiveBatch } from "@/lib/active-batch-context";
-import { useGetBatch, useCreateDeviation, getListDeviationsQueryKey } from "@workspace/api-client-react";
+import { useGetBatch, useCreateDeviation, getListDeviationsQueryKey } from "@/lib/mock-api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { 

@@ -12,7 +12,7 @@ import {
   useUpdateBatch,
   getGetBatchQueryKey,
   getListBatchesQueryKey
-} from "@workspace/api-client-react";
+} from "@/lib/mock-api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ShieldAlert, AlertCircle, FileDown, Loader2 } from "lucide-react";
