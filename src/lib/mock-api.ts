@@ -12,6 +12,10 @@ export function useCreateDeviation() {
   };
 }
 
+export function getGetBatchQueryKey() {
+  return ["batch"];
+}
+
 export function getListDeviationsQueryKey() {
   return ["deviations"];
 }
